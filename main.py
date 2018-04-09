@@ -4,47 +4,36 @@ from torch.autograd import Variable as Variable
 from data.handle.mpii import MPII
 from utils.utils import AverageMeter,Flip,ShuffleLR
 from utils.eval import Accuracy
+import ref
 
-stack_num=2
-residual_num=3
-channel_num=256
-output_num=16
-lr=2.5e-4
-alpha=0.99
-epsilon=1e-8
-weight_decay=0.0
-momentum=0.0
-threads_num=1
-batch_size=2
-epoches_num=1
+train_loador=torch.utils.data.DataLoader(MPII('train'),batch_size=ref.batch_size,shuffle=True,num_workers=ref.threads_num)
 
-train_loador=torch.utils.data.DataLoader(MPII('train'),batch_size=batch_size,shuffle=True,num_workers=threads_num)
-
-model=StackedHourgalss(stack_num,residual_num,channel_num,output_num)
+model=StackedHourgalss(ref.stack_num,ref.residual_num,ref.channel_num,ref.output_num)
 model=model.cuda()
 
 criterion=torch.nn.MSELoss()
 optimizer=torch.optim.RMSprop(
-    model.parameters(),lr=lr,alpha=alpha,eps=epsilon,weight_decay=weight_decay,momentum=momentum
+    model.parameters(),lr=ref.lr,alpha=ref.alpha,eps=ref.epsilon,weight_decay=ref.weight_decay,momentum=ref.momentum
 )
 criterion=criterion.cuda()
 
-for epoch in range(epoches_num):
+for epoch in range(ref.epoches_num):
 
     Loss,Acc=AverageMeter(),AverageMeter()
 
     for i,(input,target,meta) in enumerate(train_loador):
         inputs=Variable(input).float().cuda()
         targets=Variable(target).float().cuda()
+        inputs=Variable(input).float()
+        targets=Variable(target).float()
         output=model(inputs)
 
         loss=criterion(output[0],targets)
-        for j in range(1,stack_num):
+        for j in range(1,ref.stack_num):
             loss+=criterion(output[j],targets)
 
         Loss.update(loss.data[0], input.size(0))
-        Acc.update(Accuracy((output[stack_num - 1].data).cpu().numpy(), (targets.data).cpu().numpy()))
-
+        Acc.update(Accuracy((output[ref.stack_num - 1].data).cpu().numpy(), (targets.data).cpu().numpy()))
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()

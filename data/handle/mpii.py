@@ -7,7 +7,7 @@ import ref as ref
 from data.handle.img import Crop, DrawGaussian, Transform
 import os
 
-image_path='/home/wrruir/Downloads/images'
+image_path=os.getcwd()+"/images"
 h5_path=os.getcwd()+"/data/mpii/annot/train.h5"
 
 class MPII(data.Dataset):

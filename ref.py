@@ -33,3 +33,13 @@ mpiiImgDir = '/home/zxy/Datasets/mpii/images/'
 h36mImgDir = '/home/zxy/Datasets/Human3.6M/images/'
 
 nThreads = 2
+
+stack_num=2
+residual_num=3
+channel_num=256
+output_num=16
+lr=2.5e-4
+weight_decay=0.0
+threads_num=1
+batch_size=2
+epoches_num=1
